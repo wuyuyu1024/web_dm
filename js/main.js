@@ -49,11 +49,25 @@ async function main(dataset= 'mnist') {
         // For example, make predictions and process the results
         // ...
         mapholder = new MapHolder(data, Pinv, clf, main_svg, svg_real, svg_fake)
+        scale_x = mapholder.scale_x
+        scale_y = mapholder.scale_y
         mapholder.init_plots()
-
+        
+        // dropdown for map content
         const map_content_dropdown = document.getElementById('map_showing_dropdown')
         map_content_dropdown.addEventListener('change', mapholder.map_showing_event)
+        
+        // checkbox for interaction
+        const interaction_checkbox = document.getElementById('checkbox_adjust')
+        interaction_checkbox.addEventListener('change', mapholder.hold_checkbox_event)
 
+        // slider for sigma
+        const sigma_slider = document.getElementById('slider_radius')
+        sigma_slider.addEventListener('change', mapholder.radius_slider_event)
+
+        // slider for factor
+        const factor_slider = document.getElementById('slider_factor')
+        factor_slider.addEventListener('change', mapholder.factor_slider_event)
 
     } catch (error) {
         console.error('Error in main execution:', error);
@@ -112,47 +126,135 @@ main(dataset= 'mnist')
   
 //   });
   
-main_svg
-    .on("mouseout", function(event){
-    main_svg.selectAll(".moving_circle").remove()})  
-    .on("mousemove", function(event) {
-    // a moving circle
-    // Get the SVG element's screen transformation matrix
-    var CTM = main_svg.node().getScreenCTM();
+
+// Cache elements and calculations that don't change
+// const adjust_checkbox = document.getElementById('checkbox_adjust');
+// const CTM = main_svg.node().getScreenCTM();
+// const svgPoint = main_svg.node().createSVGPoint();
+// let movingCircle = null;
+// let movingCircleLabel = null;
+
+// main_svg.on("mouseout", function(event){
+//     if (movingCircle) movingCircle.remove();
+//     if (movingCircleLabel) movingCircleLabel.remove();
+// })  
+// .on("mousemove", function(event) {
+//     // Early return if checkbox is not checked
+//     if (!adjust_checkbox.checked) return;
+//     // console.log('moving')
+//     svgPoint.x = event.clientX;
+//     svgPoint.y = event.clientY;
+//     var svgPointTransformed = svgPoint.matrixTransform(CTM.inverse());
+
+//     // Update or create the moving circle
+//     if (movingCircle == null) {
+//         // console.log('create moving circle')
+//         movingCircle = main_svg.append("circle")
+//             .attr("fill", "#00000000")
+//             .attr("stroke", 'red')
+//             .attr("stroke-width", 2)
+//             .attr("class", "moving_circle")
+//             .attr("pointer-events", "none")
+//             .style("stroke-dasharray", ("3, 5"));
+//     }
+//     movingCircle
+//         .attr("cx", svgPointTransformed.x)
+//         .attr("cy", svgPointTransformed.y)
+//         .attr("r", 40);
+
+//     // Update or create the label for moving circle
+//     if (!movingCircleLabel) {
+//         movingCircleLabel = main_svg.append("text")
+//             .attr("class", "label_for_moving_circle")
+//             .attr("fill", "red")
+//             .attr("font-size", "12px")
+//             .attr("text-anchor", "start")
+//             .text("1σ");
+//     }
+//     movingCircleLabel
+//         .attr("x", svgPointTransformed.x - 2)
+//         .attr("y", svgPointTransformed.y + 55); // Adjusted for the radius + some padding
+// });
+
+//  my old
+var scale_x
+var scale_y
+
+// a moving circle
+// Get the SVG element's screen transformation matrix
+var CTM = main_svg.node().getScreenCTM();
+// Calculate the point clicked in the SVG's coordinate system
+var svgPoint = main_svg.node().createSVGPoint();
+let value_slider_radius = document.getElementById('slider_radius').value
+// inverse the scale
+// let value_on_scale = scale_x(value_slider_radius)
+// console.log(value_on_scale)
+
+// var radius = value_on_scale
+
+// var moving_circle = main_svg.append("circle")
+//     .attr("r", radius)
+//     .attr("fill", "#00000000")
+//     .attr("stroke", 'red')
+//     .attr("stroke-width", 2)
+//     .attr("class", "moving_circle")
+//     // no emit event for this circle
+//     .attr("pointer-events", "none")
+//     // style for this circle: dashed
+//     .style("stroke-dasharray", ("3, 5"))
+//     // .upper()
+
+// var label_cirle = main_svg.append("text")
+//     .attr("class", "label_for_moving_circle")
+//     .attr("fill", "red")
+//     .attr("font-size", "12px")
+//     .attr("text-anchor", "start")
+//     .text("1σ")
     
-    // Calculate the point clicked in the SVG's coordinate system
-    var svgPoint = main_svg.node().createSVGPoint();
-    svgPoint.x = event.clientX;
-    svgPoint.y = event.clientY;
-    var svgPointTransformed = svgPoint.matrixTransform(CTM.inverse());
+
+// main_svg
+//     .on("mouseout", function(event){
+//     main_svg.selectAll(".moving_circle")
+//         .attr("cx", -30)
+//         .attr("cy", -30)
+//     main_svg.selectAll(".label_for_moving_circle")
+//         .attr("x", 0)
+//         .attr("y", 0)
+// })  
+//     .on("mousemove", function(event) {
+//             // read the checkbox
+//         let adjust_checkbox = document.getElementById('checkbox_adjust')
+//         if (adjust_checkbox.checked === false) {return}
+//         svgPoint.x = event.clientX;
+//         svgPoint.y = event.clientY;
+//         var svgPointTransformed = svgPoint.matrixTransform(CTM.inverse());
+//         moving_circle.raise()
+//             .attr("cx", svgPointTransformed.x)
+//             .attr("cy", svgPointTransformed.y)
+
+
+//         // label_cirle.raise()
+//         //     .attr("x", svgPointTransformed.x -2)
+//         //     .attr("y", svgPointTransformed.y + radius + 15)
+
+//     // main_svg.select('.label_for_moving_circle').remove()
     
-    main_svg.selectAll(".moving_circle").remove()
-    main_svg.append("circle")
-        .attr("cx", svgPointTransformed.x)
-        .attr("cy", svgPointTransformed.y)
-        .attr("r", 40)
-        .attr("fill", "#00000000")
-        .attr("stroke", 'red')
-        .attr("stroke-width", 2)
-        .attr("class", "moving_circle")
-        // no emit event for this circle
-        .attr("pointer-events", "none")
-        // style for this circle: dashed
-        .style("stroke-dasharray", ("3, 3"))
+//     })
     
-    main_svg.append("circle")
-        .attr("cx", svgPointTransformed.x)
-        .attr("cy", svgPointTransformed.y)
-        .attr("r", 80)
-        .attr("fill", "#00000000")
-        .attr("stroke", 'red')
-        .attr("stroke-width", 2)
-        .attr("class", "moving_circle")
-        // no emit event for this circle
-        .attr("pointer-events", "none")
-        // style for this circle: dashed
-        .style("stroke-dasharray", ("6, 6"))
-  })
+    
+    // main_svg.append("circle")
+    //     .attr("cx", svgPointTransformed.x)
+    //     .attr("cy", svgPointTransformed.y)
+    //     .attr("r", 80)
+    //     .attr("fill", "#00000000")
+    //     .attr("stroke", 'red')
+    //     .attr("stroke-width", 2)
+    //     .attr("class", "moving_circle")
+    //     // no emit event for this circle
+    //     .attr("pointer-events", "none")
+    //     // style for this circle: dashed
+    //     .style("stroke-dasharray", ("6, 6"))
+
   
   
   

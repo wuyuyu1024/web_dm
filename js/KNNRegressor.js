@@ -69,8 +69,8 @@ class KNNRegressor {
     }
 
     fit(points, labels) {
-        this.points = tf.tensor2d(points);
-        this.labels = tf.tensor2d(labels);
+        this.points = points
+        this.labels = labels
     }
 
     async predict(queryPointsTensor) {
