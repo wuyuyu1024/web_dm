@@ -16,6 +16,30 @@ async function loadData(dataset= 'mnist') {
     return data;
 }
 
+
+// Function to set up the TensorFlow.js backend
+async function setUpTFBackend() {
+    try {
+        // Explicitly set backend to 'webgpu'
+        await tf.setBackend('webgpu');
+
+        // Wait for the backend to be ready
+        await tf.ready();
+
+        // Check if the backend is successfully set to 'webgpu'
+        if (tf.getBackend() !== 'webgpu') {
+            console.warn("WebGPU is not available. Falling back to 'webgl'.");
+            await tf.setBackend('webgl');
+            await tf.ready();
+        }
+
+        console.log(`Using TensorFlow.js with backend: ${tf.getBackend()}`);
+    } catch (error) {
+        console.error('Error setting up TensorFlow.js backend:', error);
+    }
+}
+
+
 // main function
 async function main(dataset= 'mnist') {
     try {
@@ -24,14 +48,8 @@ async function main(dataset= 'mnist') {
         // const model2Url = 'path/to/your/second/model.json';
         // const dataUrl = 'path/to/your/data.json';
         // try webgpu
-        await tf.setBackend('webgpu');
-        await tf.ready();
-        if (tf.getBackend() !== 'webgpu') {
-            // Fallback to another backend
-            await tf.setBackend('webgl');
-        }
-
-
+        await setUpTFBackend();
+        await console.log(`Using TensorFlow.js with backend: ${tf.getBackend()}`);
         // Load models and data
         const [clf, Pinv, data] = await Promise.all([
             loadModel_clf(dataset),
@@ -66,8 +84,8 @@ async function main(dataset= 'mnist') {
         sigma_slider.addEventListener('change', mapholder.radius_slider_event)
 
         // slider for factor
-        const factor_slider = document.getElementById('slider_factor')
-        factor_slider.addEventListener('change', mapholder.factor_slider_event)
+        // const factor_slider = document.getElementById('slider_factor')
+        // factor_slider.addEventListener('change', mapholder.factor_slider_event)
 
     } catch (error) {
         console.error('Error in main execution:', error);
@@ -83,12 +101,13 @@ var main_svg = d3.select("#main_map").append("svg")
 map_width = document.getElementById("main_map").offsetWidth
 map_height = document.getElementById("main_map").offsetHeight 
 main_svg.attr("width", map_width).attr("height", map_height).attr("id", "main_svg")
-
+.on('mousemove', (event)=>{console.log('mouse move detect')})
 // real data
 var svg_real = d3.select("#real").append("svg")
 real_width = document.getElementById("real").offsetWidth 
 real_height = document.getElementById("real").offsetHeight 
 svg_real.attr("width", real_width).attr("height", real_height).attr("id", "real_svg")
+    
 
 // fake data
 // real data
@@ -96,6 +115,39 @@ var svg_fake = d3.select("#fake").append("svg")
 fake_width = document.getElementById("fake").offsetWidth
 fake_height = document.getElementById("fake").offsetHeight
 svg_fake.attr("width", fake_width).attr("height", fake_height).attr("id", "fake_svg")
+
+
+// Function to resize SVGs/////////////////////////////
+// function resizeSVGs() {
+//     // Resize main map
+//     map_width = document.getElementById("main_map").offsetWidth;
+//     map_height = document.getElementById("main_map").offsetHeight;
+//     d3.select("#main_svg").attr("width", map_width).attr("height", map_height);
+
+//     // Resize real data SVG
+//     real_width = document.getElementById("real").offsetWidth;
+//     real_height = document.getElementById("real").offsetHeight;
+//     d3.select("#real_svg").attr("width", real_width).attr("height", real_height);
+
+//     // Resize fake data SVG
+//     fake_width = document.getElementById("fake").offsetWidth;
+//     fake_height = document.getElementById("fake").offsetHeight;
+//     d3.select("#fake_svg").attr("width", fake_width).attr("height", fake_height);
+// }
+
+// // Initial resize
+// resizeSVGs();
+
+// // Resize event listener
+// window.addEventListener("resize", resizeSVGs);
+/////////////////////////////////////////////
+
+// Your existing code for appending SVGs
+// (Ensure this runs before the initial call to resizeSVGs)
+// var main_svg = d3.select("#main_map").append("svg").attr("id", "main_svg");
+// var svg_real = d3.select("#real").append("svg").attr("id", "real_svg");
+// var svg_fake = d3.select("#fake").append("svg").attr("id", "fake_svg");
+
 
 //TO DO: some wigets
 // tf.setBackend('webgpu').then(() => main());
@@ -177,8 +229,8 @@ main(dataset= 'mnist')
 // });
 
 //  my old
-var scale_x
-var scale_y
+// var scale_x
+// var scale_y
 
 // a moving circle
 // Get the SVG element's screen transformation matrix
@@ -213,33 +265,34 @@ let value_slider_radius = document.getElementById('slider_radius').value
     
 
 // main_svg
-//     .on("mouseout", function(event){
-//     main_svg.selectAll(".moving_circle")
-//         .attr("cx", -30)
-//         .attr("cy", -30)
-//     main_svg.selectAll(".label_for_moving_circle")
-//         .attr("x", 0)
-//         .attr("y", 0)
-// })  
+// //     .on("mouseout", function(event){
+// //     main_svg.selectAll(".moving_circle")
+// //         .attr("cx", -30)
+// //         .attr("cy", -30)
+// //     main_svg.selectAll(".label_for_moving_circle")
+// //         .attr("x", 0)
+// //         .attr("y", 0)
+// // })  
 //     .on("mousemove", function(event) {
-//             // read the checkbox
-//         let adjust_checkbox = document.getElementById('checkbox_adjust')
-//         if (adjust_checkbox.checked === false) {return}
-//         svgPoint.x = event.clientX;
-//         svgPoint.y = event.clientY;
-//         var svgPointTransformed = svgPoint.matrixTransform(CTM.inverse());
-//         moving_circle.raise()
-//             .attr("cx", svgPointTransformed.x)
-//             .attr("cy", svgPointTransformed.y)
+//         console.log('move out side')})
+            // read the checkbox
+        // let adjust_checkbox = document.getElementById('checkbox_adjust')
+        // if (adjust_checkbox.checked === false) {return}
+        // svgPoint.x = event.clientX;
+        // svgPoint.y = event.clientY;
+        // var svgPointTransformed = svgPoint.matrixTransform(CTM.inverse());
+        // moving_circle.raise()
+        //     .attr("cx", svgPointTransformed.x)
+        //     .attr("cy", svgPointTransformed.y)
 
 
-//         // label_cirle.raise()
-//         //     .attr("x", svgPointTransformed.x -2)
-//         //     .attr("y", svgPointTransformed.y + radius + 15)
+        // label_cirle.raise()
+        //     .attr("x", svgPointTransformed.x -2)
+        //     .attr("y", svgPointTransformed.y + radius + 15)
 
-//     // main_svg.select('.label_for_moving_circle').remove()
+    // main_svg.select('.label_for_moving_circle').remove()
     
-//     })
+    // })
     
     
     // main_svg.append("circle")
@@ -285,16 +338,7 @@ function update_image(window, image, numChannels=1, alpha_list=null){
       .lower() // set it to bottom
       .attr('class', 'pixel')
       .attr('opacity', (d, i) => numChannels !== 1 ? alpha_list ? alpha_list[i] * 0.9 : 0.8 : 1)
-//         .lower();
-      
-    //   if (numChannels !=1){
-    //     if (alpha_list === null){
-    //         pixels.attr("opacity", 0.8)
-    //     }
-    //     else{
-    //         pixels.attr("opacity", (d, i) => alpha_list[i]*0.9)
-    //     }
-    //   }
+      .attr("pointer-events", "none")
   }
 
 // function update_image(window, image, numChannels = 1, alpha_list = null) {

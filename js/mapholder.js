@@ -10,21 +10,18 @@ class MapHolder {
         this.XY_tensor = tf.tensor2d(data.XY, [data.XY.length, 2]);
         this.current_z = tf.tensor2d(data.z_of_XY, [data.z_of_XY.length, data.z_of_XY[0].length]);
         this.initial_z = this.current_z.clone();
+        this.initial_Iinv =  this.Pinv.predict([this.XY_tensor, this.initial_z])
+        this.current_Iinv = this.initial_Iinv.clone()
         
         this.padding = data.padding
         this.adjusting = false
         this.adjust_factor = 0.3
-        this.map_showing = 0
+        // this.map_showing = 0
         this.hold_checkbox_event = this.hold_checkbox_event.bind(this); // WTF is this?
         // this.make_moving_circle = this.make_moving_circle.bind(this);
         this.map_showing_event = this.map_showing_event.bind(this);
         this.updateZ = this.updateZ.bind(this);
-
-
-        // padding_x = (d3.max(data.X2d, d => d[0]) - d3.min(data.X2d, d => d[0])) * padding
-        // padding_y = (d3.max(data.X2d, d => d[1]) - d3.min(data.X2d, d => d[1])) * padding
-        // console.log(padding_x)
-        // console.log(padding_y)
+        this.radius_slider_event = this.radius_slider_event.bind(this);
       
         this.scale_x = d3.scaleLinear()
           .domain([0-this.padding, 1+this.padding])
@@ -55,7 +52,8 @@ class MapHolder {
 
 
 
-    update_main_map(){
+    update_main_map(Inv=true){
+              
         //TODO: check some conitions
         if (this.map_showing == 0) {
             this.plot_DMdata(false)
@@ -65,36 +63,33 @@ class MapHolder {
         }
         else if (this.map_showing == 2) {
             console.log('placeholder')
-            this.plot_diff_map()
+            this.plot_diff_map_z()
         }
         else if (this.map_showing == 3) {
+            console.log('placeholder2')
+            this.plot_diff_map_Iinv()
+        }
+        else if (this.map_showing == 4) {
             
-            const tem = [['FFFFFF']]
-            update_image(this.main_svg, tem, 4, [0])
+            this.main_svg.selectAll(".pixel").remove()
         }
   
     }
 
     async plot_DMdata(proba=true){
-        // count time
         console.time('Pinv')
-        const Iinv = this.Pinv.predict([this.XY_tensor, this.current_z])
-        // time end
+          this.current_Iinv = this.Pinv.predict([this.XY_tensor, this.current_z])  //  reduce reapating
         console.timeEnd('Pinv')
-        // time start
+
         console.time('clf')
-        const predictions = this.clf.predict(Iinv)
-        // time end
+        const predictions = this.clf.predict(this.current_Iinv)
         console.timeEnd('clf')
-        // time start
+
         console.time('process')
         const labels = await predictions.argMax(1).array();
-        // console.log(labels)
         const label_colors = labels.map(d => this.labels_scalar(d))
-        // console.log(label_colors)
-        // time end
         console.timeEnd('process')
-        // time start
+
         console.time('plot pixels')
         if (proba) {
             // Find the maximum values along the same axis
@@ -102,18 +97,28 @@ class MapHolder {
             // Convert the tensor to array if you need to work with regular JavaScript arrays
             const confidences = await maxValuesTensor.array();
             update_image(this.main_svg, label_colors, 4, confidences);
-            // return [labels, confidences]
         }
         else {
             update_image(this.main_svg, label_colors, 3)}
-        // time end
         console.timeEnd('plot pixels')
         }
        
-    async plot_diff_map(){
+    async plot_diff_map_z(){
         let diff = tf.sub(this.current_z, this.initial_z)
-        // l2 norm
-        diff = diff.pow(2).sum(1).sqrt()
+        diff = diff.pow(2).sum(1).sqrt()  // l2 norm
+        let diff_cpu = await diff.array()
+        let diff_scale = d3.scaleLinear()
+            .domain(d3.extent(diff_cpu))
+            .range([0, 255])
+        diff_scale = diff_cpu.map(d => diff_scale(d))
+        update_image(this.main_svg, diff_scale, 1)
+
+    }
+
+    async plot_diff_map_Iinv(){
+        this.current_Iinv = this.Pinv.predict([this.XY_tensor, this.current_z]) // TODO: reduce repeating
+        let diff = tf.sub(this.current_Iinv, this.initial_Iinv)
+        diff = diff.pow(2).sum(1).sqrt()  // l2 norm
         let diff_cpu = await diff.array()
         // console.log(diff_cpu)
         let diff_scale = d3.scaleLinear()
@@ -122,7 +127,7 @@ class MapHolder {
         // console.log(diff_scale(0.5))
         diff_scale = diff_cpu.map(d => diff_scale(d))
         update_image(this.main_svg, diff_scale, 1)
-
+        
     }
 
     /// plot the scatters
@@ -149,6 +154,7 @@ class MapHolder {
                 .attr("r", 4)
             })
             .on("click", async function(evnet, x2d){
+     
                 vis.main_svg.selectAll(".selected_circle").remove()
                 // console.log(event)
                 // console.log(x2d)
@@ -182,120 +188,90 @@ class MapHolder {
         const y0 = X2d[1];
         const x = this.XY_tensor.slice([0, 0], [-1, 1]).reshape([-1]);
         const y = this.XY_tensor.slice([0, 1], [-1, 1]).reshape([-1]);
-        x.print()
     
         const gaussian = tf.exp(tf.neg(tf.add(tf.square(tf.sub(x, x0)), tf.square(tf.sub(y, y0))).div(2 * sigma * sigma)));
-        // gaussian.print()
-        // console.log(gaussian.shape)
-        
-
         let filter = gaussian.reshape([this.data.GRID, this.data.GRID, -1]);
-
-        // let gaussian_image = filter.reshape([10000,]).arraySync()
-        // gaussian_image = gaussian_image.map(d => d * 255)
-        // update_image(this.main_svg, gaussian_image, 1) // looks correct
-
-        // filter.print()
         filter = tf.tile(filter, [1, 1, this.data.z[0].length]); // (100,100, 16)
-        console.log(filter.shape)
         return filter;
     }
 
     async updateZ(index) {
         let vis = this
         console.log('update z')
-        // console.log(index)
-        // console.log(vis)
-        // Assuming encode and get_z are methods that you have defined
+
         let X2d = vis.data.X2d[index]
-        console.log('check 2D location')
-        console.log(X2d)
         let x2d_tensor = tf.tensor2d(X2d, [1, 2])
         let z_tensor = await vis.zfinder.predict(x2d_tensor)
 
         let target_z = vis.data.z[index]
         const deltaZ = tf.sub(target_z, z_tensor);
-        deltaZ.print()
         const filter = vis.gaussianFilter(X2d, this.radius); // not working
 
         const delta = deltaZ.mul(filter);
-        console.log(delta.shape)
-        // console.log(this.adjust_factor)
-        this.current_z = this.current_z.add(delta.reshape([-1, this.current_z.shape[1]]).mul(this.adjust_factor));
-        // this.current_z = this.current_z.add(delta.reshape([10000,1, 1]).mul(this.adjust_factor));
-        // this.current_z = tf.clipByValue(this.current_z, -1, 1);  //// WTF is this? it ruins everything
+        const adjust_factor = +document.getElementById('slider_factor').value
+        this.current_z = this.current_z.add(delta.reshape([-1, this.current_z.shape[1]]).mul(adjust_factor));
+        // refit the zfinder
         this.zfinder.fit(this.XY_tensor, this.current_z)
     }
 
 
-    // get z for a given x2d
-    get_z(x2d){
-        // console.log('init zfinder')
-        const result = this.zfinder.predict(x2d)
-        // console.log(result)
-        return result
-        }
+    // // get z for a given x2d  // not using | can be deleted
+    // get_z(x2d){
+    //     // console.log('init zfinder')
+    //     const result = this.zfinder.predict(x2d)
+    //     // console.log(result)
+    //     return result
+    //     }
 
         // update the fake image on click (press) event
     plot_Pinv_on_click(){
         let vis = this;
-        this.main_svg
-            // .on('mousedown', function(event){this.mousedown = true})
-            // .on('mouseup', function(event){this.mousedown = false})
-            // .on("mousemove", async function(event) 
+
+
+        vis.main_svg
+            .on('mousedown', function(event){vis.mousedown = true;})
+            .on('mouseup', function(event){vis.mousedown = false;})
+            // .on("mousemove", function(event) 
             //     {
-            //     if (!this.mousedown) return;
-            //     // main_svg.selectAll(".selected_circle").remove()
-            //     // Get the SVG element's screen transformation matrix
-            //     var CTM = main_svg.node().getScreenCTM();
-            
-            //     // Calculate the point clicked in the SVG's coordinate system
-            //     var svgPoint = main_svg.node().createSVGPoint();
-            //     svgPoint.x = event.clientX;
-            //     svgPoint.y = event.clientY;
-            //     var svgPointTransformed = svgPoint.matrixTransform(CTM.inverse());
-            
-            //     // Now svgPointTransformed.x and svgPointTransformed.y are the correct coordinates
-            //     // console.log(svgPointTransformed.x, svgPointTransformed.y);
-            
-            //     // Use your scales to invert the coordinates
-            //     var x_scale = mapholder.scale_x.invert(svgPointTransformed.x);
-            //     var y_scale = mapholder.scale_y.invert(svgPointTransformed.y);
-            //     ////////////////
-            //     const x2d_tensor = tf.tensor2d([x_scale, y_scale], [1, 2])
-            //     const z_tensor = await mapholder.zfinder.predict(x2d_tensor)
-            //     // // z_tensor.print()
-            //     // const predict = await mapholder.Pinv.predict([x2d_tensor, z_tensor]).array()
-            //     const predict = mapholder.Pinv.predict([x2d_tensor, z_tensor]).arraySync()  // not ideal
-            //     // pred = clf.predict(data).arraySync()
-            //     const image = predict[0].map(d => d * 255)
-            //     update_image(vis.fake_svg, image)
-            
-            //     // console.log(z) 
+        
+                // if (!vis.mousedown) return;
+                // const now = Date.now();
+                // console.log('moving')
+                // if (now - lastExecution > throttleDuration) {
+                //     console.log('reach')
+                //     lastExecution = now;
+                //     //  event handling logic here
+                //     svgPoint.x = event.clientX;
+                //     svgPoint.y = event.clientY;
+                //     var svgPointTransformed = svgPoint.matrixTransform(CTM.inverse());
+                    
+                //     // Use your scales to invert the coordinates
+                //     var x_scale = vis.scale_x.invert(svgPointTransformed.x);
+                //     var y_scale = vis.scale_y.invert(svgPointTransformed.y);
+                //     ////////////////
+                //     const x2d_tensor = tf.tensor2d([x_scale, y_scale], [1, 2])
+                //     const z_tensor = await vis.zfinder.predict(x2d_tensor)
+                //     // z_tensor.print()
+                //     const predict = await vis.Pinv.predict([x2d_tensor, z_tensor]).array()
+                //     // pred = clf.predict(data).arraySync()
+                //     const image = predict[0].map(d => d * 255)
+                //     update_image(vis.fake_svg, image)
+                // }
             // })
             .on('click', async function(event){
-                // console.log('clicking on the map')
-                // main_svg.selectAll(".selected_circle").remove()
-                // // Get the SVG element's screen transformation matrix
-                // var CTM = main_svg.node().getScreenCTM(); // already in main
-            
-                // // Calculate the point clicked in the SVG's coordinate system
-                // var svgPoint = main_svg.node().createSVGPoint(); // already in main
+                console.log('clicked')
                 svgPoint.x = event.clientX;
                 svgPoint.y = event.clientY;
                 var svgPointTransformed = svgPoint.matrixTransform(CTM.inverse());
-            
-                // Now svgPointTransformed.x and svgPointTransformed.y are the correct coordinates
-                // console.log(svgPointTransformed.x, svgPointTransformed.y);
-            
+                
                 // Use your scales to invert the coordinates
-                var x_scale = mapholder.scale_x.invert(svgPointTransformed.x);
-                var y_scale = mapholder.scale_y.invert(svgPointTransformed.y);
+                var x_scale = vis.scale_x.invert(svgPointTransformed.x);
+                var y_scale = vis.scale_y.invert(svgPointTransformed.y);
                 ////////////////
                 const x2d_tensor = tf.tensor2d([x_scale, y_scale], [1, 2])
-                const z_tensor = await mapholder.zfinder.predict(x2d_tensor)
+                const z_tensor = await vis.zfinder.predict(x2d_tensor)
                 // z_tensor.print()
-                const predict = await mapholder.Pinv.predict([x2d_tensor, z_tensor]).array()
+                const predict = await vis.Pinv.predict([x2d_tensor, z_tensor]).array()
                 // pred = clf.predict(data).arraySync()
                 const image = predict[0].map(d => d * 255)
                 update_image(vis.fake_svg, image)
@@ -304,22 +280,20 @@ class MapHolder {
  
         // events handling
         map_showing_event(event){
-            console.log(this)
-            // get value 
             const value = event.target.value
-            console.log(value)
             this.map_showing = value
-            console.log(this.map_showing)
+            // console.log(this.map_showing)
             this.update_main_map()
 
         }
     
         hold_checkbox_event(event){
             console.log(event)
-            // get value 
             const value = event.target.checked
             console.log(value)
             this.adjusting = value
+            this.moving_circle.attr("cx", 0.5*map_width)
+            .attr("cy", 0.5*map_height)
         }
     
         radius_slider_event(event){
@@ -328,24 +302,25 @@ class MapHolder {
             const value = event.target.value
             console.log(value)
             this.radius = value
+            let radius_to_pixel_x = this.scale_x(value) - this.scale_x(0)  //////SCALER CAN NOT BE USED HERE
+            this.moving_circle.attr("r", radius_to_pixel_x*2)
+            // .attr("cx", 0.5*map_width)
+            // .attr("cy", 0.5*map_height)
         }
     
-        factor_slider_event(event){
-            console.log(event)
-            // get value 
-            const value = event.target.value
-            console.log(value)
-            this.factor = value // to fix
-        }
 
         make_moving_circle = () => {
             let vis = this
+
+            let lastExecution = 0;
+            const throttleDuration = 100; //
             // console.log(vis)
             // let radius_to_pixel_x = vis.scale_x(radius) - vis.scale_x(0)  //////SCALER CAN NOT BE USED HERE
             // console.log('debug')
             // console.log(radius_to_pixel_x)
             // let radius_to_pixel_y = this.scale_y(radius) - this.scale_y(0)
-            let radius_to_pixel_x = 40
+            const slider_value = document.getElementById("slider_radius").value
+            let radius_to_pixel_x = slider_value * map_width *2
             this.moving_circle = vis.main_svg.append("circle")
             // console.log(this.moving_circle)
 
@@ -360,12 +335,11 @@ class MapHolder {
                 // style for this circle: dashed
                 .style("stroke-dasharray", ("3, 5"))
 
-
             vis.main_svg
             .on("mouseout",  (event) => {  // Arrow function here
                 if (vis.adjusting == false) {this.moving_circle
-                                                    .attr("cx", -30)
-                                                    .attr("cy", -30);}
+                                                    .attr("cx", 1000)
+                                                    .attr("cy", 1000);}
                 else {this.moving_circle                    
                     // .transition()
                     // .duration(300)
@@ -375,16 +349,39 @@ class MapHolder {
                 }
                 
             })  
-            .on("mousemove", (event) => { 
-                    // read the checkbox
-                // console.log(vis.adjusting)
-                if (vis.adjusting == false) {return}
-                svgPoint.x = event.clientX;
+            .on("mousemove", async (event) => { 
+                if (vis.adjusting == true)
+                {svgPoint.x = event.clientX;
                 svgPoint.y = event.clientY;
                 var svgPointTransformed = svgPoint.matrixTransform(CTM.inverse());
                 this.moving_circle//.raise()
                     .attr("cx", svgPointTransformed.x)
-                    .attr("cy", svgPointTransformed.y)
-            })
+                    .attr("cy", svgPointTransformed.y)}
+                    // read the checkbox
+                // console.log(vis.adjusting)
+                const now = Date.now();
+                // console.log('moving')
+                if (vis.mousedown && Date.now() - lastExecution > throttleDuration) {
+                    // console.log('reach')
+                    lastExecution = now;
+                    
+                    svgPoint.x = event.clientX;
+                    svgPoint.y = event.clientY;
+                    var svgPointTransformed = svgPoint.matrixTransform(CTM.inverse());
+                    
+                    // Use your scales to invert the coordinates
+                    var x_scale = vis.scale_x.invert(svgPointTransformed.x);
+                    var y_scale = vis.scale_y.invert(svgPointTransformed.y);
+                    ////////////////
+                    const x2d_tensor = tf.tensor2d([x_scale, y_scale], [1, 2])
+                    const z_tensor = await vis.zfinder.predict(x2d_tensor)
+                    // z_tensor.print()
+                    const predict = await vis.Pinv.predict([x2d_tensor, z_tensor]).array()
+                    // pred = clf.predict(data).arraySync()
+                    const image = predict[0].map(d => d * 255)
+                    update_image(vis.fake_svg, image)
+                }
+
+        })
                 }
 }

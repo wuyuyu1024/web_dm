@@ -13,7 +13,7 @@
     <!-- CSS libraries -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.2/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-uWxY/CJNBR+1zjPWmfnSnVxwRheevXITnMqoEIeG1LJrdI0GlVs/9cVSyPYXdcSF" crossorigin="anonymous">
-    <link rel="stylesheet" href="css/fontawesome.min.css">
+    <!-- <link rel="stylesheet" href="css/fontawesome.min.css"> -->
 
     <!-- Custom CSS code -->
     <link rel="stylesheet" href="css/style.css">
@@ -38,7 +38,7 @@
             <!-- graph -->
             <div class="row justify-content-center" style="height: 80vh">
                 <!-- main map -->
-                <div class="col-md-6" id="main_map" style="height: 100%; padding: 0;"></div>
+                <div class="col-md-6 square-div" id="main_map" style="height: 100%; padding: 0;"></div>
                 <!-- widgets -->
                 <div class="col-md-4 widget" id="widget" style="height: 100%;">
                     <!-- widgets -->
@@ -47,10 +47,12 @@
                         <div class="col-md-3"> <p>map content:</p></div>
                         <div class="col-md-9">
                             <select id="map_showing_dropdown">
+                                <option value="4">None</option>
                                 <option value="0">Decsion Map</option>
                                 <option value="1">Decsion Map with confidence</option>
-                                <option value="2">Distance to the initial surface</option>
-                                <option value="3">None</option>
+                                <option value="2">Distance to the initial z</option>
+                                <option value="3">Distance to the initial surface</option>
+                
                             </select>
                         </div>
                     <!--check box -->
@@ -62,13 +64,13 @@
                     <p></p>
                     <br>
                     <p> Radius
-                        <input id="slider_radius" type="range" min="0.01" max="1" step="0.02" value="0.3" orient="horizontal">
+                        <input id="slider_radius" type="range" min="0.01" max="0.4" step="0.01" value="0.15" orient="horizontal">
                     </p>
                     <p> Factor
                         <input id="slider_factor" type="range" min="0" max="1" step="0.01" value="0.4" orient="horizontal">
                     </p>
                     <!-- window to show the selected data -->
-                    <div class="row" style="height: 10vh"> 
+                    <div class="row" style="height: 8vh"> 
                         <div class="col-md-5 offset-1"  style="padding: 0.5;">
                             <p>Real data</p><br>
                             <p>(click click scatters)</p>
@@ -78,9 +80,9 @@
                             <p>(click anywhere on map)</p>
                         </div>
                     </div> 
-                    <div class="row" style="height: 25vh"> 
-                        <div class="col-md-5 offset-1" id="real" style="padding: 0; border: 1px solid rgb(2,2,2) "></div>
-                        <div class="col-md-5 offset-1" id="fake" style="padding: 0; border: 1px solid rgb(2,2,2)"></div>
+                    <div class="row" style="height: 20vh"> 
+                        <div class="col-md-5 offset-1 square-div" id="real" style="padding: 0; border: 1px solid rgb(2,2,2) "></div>
+                        <div class="col-md-5 offset-1 square-div" id="fake" style="padding: 0; border: 1px solid rgb(2,2,2)"></div>
              
                     </div>
                 </div>
@@ -115,8 +117,8 @@
 <script src="js/KNNRegressor.js"></script>
 <script src="js/mapholder.js"></script>
 <!-- Visualization objects -->
-<script src="js/stackedAreaChart.js"></script>
-<script src="js/timeline.js"></script>
+<!-- <script src="js/stackedAreaChart.js"></script>
+<script src="js/timeline.js"></script> -->
 
 <!-- Load data, create visualizations -->
 <script src="js/main.js"></script>

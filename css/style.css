@@ -55,3 +55,8 @@ div .widget {
   text-align: left;
 }
 
+.square-div {
+  aspect-ratio: 1 / 1;
+} 
+
+
