@@ -51,12 +51,12 @@ div .widget {
   /* stroke: green;
   stroke-width: 2px;
   border-color: green; */
-  border: 1px solid rgb(4, 193, 61);
+  /* border: 1px solid rgb(4, 193, 61); */
   text-align: left;
 }
 
-.square-div {
+/* .square-div {
   aspect-ratio: 1 / 1;
-} 
+}  */
 
 

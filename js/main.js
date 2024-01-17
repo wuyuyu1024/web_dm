@@ -49,7 +49,7 @@ async function main(dataset= 'mnist') {
         // const dataUrl = 'path/to/your/data.json';
         // try webgpu
         await setUpTFBackend();
-        await console.log(`Using TensorFlow.js with backend: ${tf.getBackend()}`);
+
         // Load models and data
         const [clf, Pinv, data] = await Promise.all([
             loadModel_clf(dataset),
