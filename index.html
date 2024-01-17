@@ -48,11 +48,11 @@
                         <div class="col-md-9">
                             <select id="map_showing_dropdown">
                                 <option value="4">None</option>
-                                <option value="0">Decsion Map</option>
-                                <option value="1">Decsion Map with confidence</option>
                                 <option value="2">Distance to the initial z</option>
                                 <option value="3">Distance to the initial surface</option>
-                
+                                <option value="0">Decsion Map</option>
+                                <option value="1">Decsion Map with confidence</option>
+               
                             </select>
                         </div>
                     <!--check box -->
@@ -63,12 +63,15 @@
                     <br>
                     <p></p>
                     <br>
-                    <p> Radius
+                        <label for="slider_radius">Radius:</label>
                         <input id="slider_radius" type="range" min="0.01" max="0.34" step="0.01" value="0.08" orient="horizontal">
-                    </p>
-                    <p> Factor
+                  
+                        <label for="slider_factor">Factor:</label>
                         <input id="slider_factor" type="range" min="0" max="1" step="0.01" value="0.3" orient="horizontal">
-                    </p>
+                    
+                    <br>
+                    <p></p>
+                    <br>
                     <!-- window to show the selected data -->
                     <div class="row" style="height: 8vh"> 
                         <div class="col-md-5 offset-1"  style="padding: 0.5;">

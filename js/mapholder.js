@@ -302,8 +302,8 @@ class MapHolder {
             const value = event.target.value
             console.log(value)
             this.radius = value
-            let radius_to_pixel_x = this.scale_x(value) - this.scale_x(0)  //////SCALER CAN NOT BE USED HERE
-            this.moving_circle.attr("r", radius_to_pixel_x*2)
+            this.radius_to_pixel_x = this.scale_x(value) - this.scale_x(0)  //////SCALER CAN NOT BE USED HERE
+            this.moving_circle.attr("r", this.radius_to_pixel_x*2)
             // .attr("cx", 0.5*map_width)
             // .attr("cy", 0.5*map_height)
         }
@@ -313,7 +313,7 @@ class MapHolder {
             let vis = this
 
             let lastExecution = 0;
-            const throttleDuration = 100; //
+            const throttleDuration = 41; //
             // console.log(vis)
             // let radius_to_pixel_x = vis.scale_x(radius) - vis.scale_x(0)  //////SCALER CAN NOT BE USED HERE
             // console.log('debug')
@@ -339,7 +339,9 @@ class MapHolder {
             .on("mouseout",  (event) => {  // Arrow function here
                 if (vis.adjusting == false) {this.moving_circle
                                                     .attr("cx", 1000)
-                                                    .attr("cy", 1000);}
+                                                    .attr("cy", 1000)
+                                                    // .attr("r", 0)
+                                                }
                 else {this.moving_circle                    
                     // .transition()
                     // .duration(300)
@@ -356,7 +358,9 @@ class MapHolder {
                 var svgPointTransformed = svgPoint.matrixTransform(CTM.inverse());
                 this.moving_circle//.raise()
                     .attr("cx", svgPointTransformed.x)
-                    .attr("cy", svgPointTransformed.y)}
+                    .attr("cy", svgPointTransformed.y)
+                    // .attr("r", this.radius_to_pixel_x *2)
+                }
                     // read the checkbox
                 // console.log(vis.adjusting)
                 const now = Date.now();
