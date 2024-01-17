@@ -313,7 +313,7 @@ class MapHolder {
             let vis = this
 
             let lastExecution = 0;
-            const throttleDuration = 41; //
+            const throttleDuration = 80; //
             // console.log(vis)
             // let radius_to_pixel_x = vis.scale_x(radius) - vis.scale_x(0)  //////SCALER CAN NOT BE USED HERE
             // console.log('debug')
