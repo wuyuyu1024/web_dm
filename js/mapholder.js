@@ -22,6 +22,7 @@ class MapHolder {
         this.map_showing_event = this.map_showing_event.bind(this);
         this.updateZ = this.updateZ.bind(this);
         this.radius_slider_event = this.radius_slider_event.bind(this);
+        this.radius = document.getElementById("slider_radius").value
       
         this.scale_x = d3.scaleLinear()
           .domain([0-this.padding, 1+this.padding])

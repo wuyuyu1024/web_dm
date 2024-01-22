@@ -59,4 +59,9 @@ div .widget {
   aspect-ratio: 1 / 1;
 }  */
 
+#slider {
+  overflow: hidden;
+  width: 100vw
+}
+
 
