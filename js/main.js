@@ -97,28 +97,30 @@ async function main(dataset= 'mnist') {
 
 /// create some frames
 // main map
+let border_px = 2
 var main_svg = d3.select("#main_map").append("svg")
-map_width = document.getElementById("main_map").offsetWidth
-map_height = document.getElementById("main_map").offsetHeight 
+//minus border
+map_width = document.getElementById("main_map").offsetWidth - border_px
+map_height = document.getElementById("main_map").offsetHeight - border_px
 main_svg.attr("width", map_width).attr("height", map_height).attr("id", "main_svg")
 .on('mousemove', (event)=>{console.log('mouse move detect')})
 // real data
 var svg_real = d3.select("#real").append("svg")
-real_width = document.getElementById("real").offsetWidth 
-real_height = document.getElementById("real").offsetHeight 
+real_width = document.getElementById("real").offsetWidth - border_px
+real_height = document.getElementById("real").offsetHeight - border_px
 svg_real.attr("width", real_width).attr("height", real_height).attr("id", "real_svg")
     
 
 // fake data
 // real data
 var svg_fake = d3.select("#fake").append("svg")
-fake_width = document.getElementById("fake").offsetWidth
-fake_height = document.getElementById("fake").offsetHeight
+fake_width = document.getElementById("fake").offsetWidth - border_px
+fake_height = document.getElementById("fake").offsetHeight - border_px
 svg_fake.attr("width", fake_width).attr("height", fake_height).attr("id", "fake_svg")
 
 // ob svg, set the size
 var ob_svg = d3.select(".ob_image")
-ob_height = document.getElementsByClassName('ob_window')[0].offsetHeight
+ob_height = document.getElementsByClassName('ob_window')[0].offsetHeight - border_px
 ob_width = ob_height
 for (let i = 0; i<6; i++){
     og_svg = d3.select("#ob" + (i))
