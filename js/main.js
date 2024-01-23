@@ -395,7 +395,7 @@ ob_svgs.on("mouseover", function(event) {
             .style("left", xPosition + "px")
             .style("top", yPosition + "px")						
             .select("#value")
-            .text('Click here and the click on the map to set the observation point ' + this.id[2]);
+            .text('Click here and then click on the map to set the observation point ' + this.id[2]);
 
         //Show the tooltip
         d3.select("#tooltip").classed("hidden", false);
@@ -424,7 +424,7 @@ svg_real.on("mouseover", function(event) {
             .style("left", xPosition + "px")
             .style("top", yPosition + "px")						
             .select("#value")
-            .text('Click scatters to show the data');
+            .text('Click scatters to show the origninal data');
     
         //Show the tooltip
         d3.select("#tooltip").classed("hidden", false);
@@ -451,7 +451,7 @@ svg_fake.on("mouseover", function(event) {
                 .style("left", xPosition + "px")
                 .style("top", yPosition + "px")						
                 .select("#value")
-                .text('Click anywhere and the mao to show the inverse projection');
+                .text('Click anywhere and the map to show the inverse projection');
         
             //Show the tooltip
             d3.select("#tooltip").classed("hidden", false);
