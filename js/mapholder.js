@@ -15,8 +15,12 @@ class MapHolder {
         
         this.padding = data.padding
         this.adjusting = false
-        this.adjust_factor = 0.3
-        // this.map_showing = 0
+        this.adjust_factor = document.getElementById("slider_factor").value
+        this.setting_ob = null
+        this.ob_2d = [[0.5, 0.5], [0.5, 0.5], [0.5, 0.5], [0.5, 0.5], [0.5, 0.5], [0.5, 0.5]]
+        this.ob_setted = [false, false, false, false, false, false]
+
+        this.map_showing = document.getElementById("map_showing_dropdown").value
         this.hold_checkbox_event = this.hold_checkbox_event.bind(this); // WTF is this?
         // this.make_moving_circle = this.make_moving_circle.bind(this);
         this.map_showing_event = this.map_showing_event.bind(this);
@@ -48,10 +52,22 @@ class MapHolder {
         
         console.timeEnd('init zfinder')
         this.make_moving_circle()
+        this.init_ob_windows()
 
     }
 
-
+    init_ob_windows(){
+        let vis = this
+        const ob_svgs = d3.selectAll(".ob_svg")
+        ob_svgs.on("click", function(event, i){
+            const ind = this.id.slice(2) 
+            // console.log(ind)
+            vis.setting_ob = ind
+            console.log(vis.setting_ob)
+            // vis.ob_setted[ind] = true
+            // console.log(vis.ob_setted)
+        })
+    }
 
     update_main_map(Inv=true){
               
@@ -73,8 +89,18 @@ class MapHolder {
         else if (this.map_showing == 4) {
             
             this.main_svg.selectAll(".pixel").remove()
-        }
+            this.main_svg.append('rect')
+                .attr('class', 'pixel')
+                .attr('x', 0)
+                .attr('y', 0)
+                .attr('width', map_width)
+                .attr('height', map_height)
+                .attr('fill', '#BBBBBB')
+                .attr('opacity', 0.5)
+                // to the bottom
+                .lower()
   
+    }
     }
 
     async plot_DMdata(proba=true){
@@ -177,6 +203,7 @@ class MapHolder {
                 if (vis.adjusting) {
                     await vis.updateZ(index)
                     vis.update_main_map()
+                    vis.update_ob_windows()
                 }
             
     })
@@ -215,7 +242,23 @@ class MapHolder {
         this.zfinder.fit(this.XY_tensor, this.current_z)
     }
 
-
+    async update_ob_windows() {
+        
+        let vis = this
+        const ob_2d_tensor = tf.tensor2d(vis.ob_2d, [6, 2])
+        const ob_z = await vis.zfinder.predict(ob_2d_tensor)
+        // ob_z.print()
+        const ob_Iinv = await vis.Pinv.predict([ob_2d_tensor, ob_z]).array()
+        // console.log(ob_Iinv)
+        
+        for (let i = 0; i < 6; i++) {
+            if (vis.ob_setted[i]) {
+                const ob_image = ob_Iinv[i].map(d => d * 255)
+                const ob_svg = d3.select("#ob" + (i))
+                update_image(ob_svg, ob_image)
+            }
+        }
+    }
     // // get z for a given x2d  // not using | can be deleted
     // get_z(x2d){
     //     // console.log('init zfinder')
@@ -276,6 +319,25 @@ class MapHolder {
                 // pred = clf.predict(data).arraySync()
                 const image = predict[0].map(d => d * 255)
                 update_image(vis.fake_svg, image)
+
+                console.log(vis.setting_ob)
+                if (vis.setting_ob !== null) {
+                    d3.select(".ob_text" + vis.setting_ob).remove()
+                    vis.ob_2d[vis.setting_ob] = [x_scale, y_scale]
+                    vis.ob_setted[vis.setting_ob] = true
+                    
+                    vis.update_ob_windows()
+                    // add a text marker
+                    vis.main_svg.append('text')
+                        .attr('x', svgPointTransformed.x)
+                        .attr('y', svgPointTransformed.y)
+                        .text(vis.setting_ob)
+                        .attr('class', 'ob_text' + vis.setting_ob)
+                        .attr('pointer-events', 'none')
+                        .attr('text-anchor', 'middle')
+                        .attr('fill', 'white')
+                    vis.setting_ob = null
+                }
         })   
 }
  

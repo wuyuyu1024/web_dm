@@ -116,6 +116,17 @@ fake_width = document.getElementById("fake").offsetWidth
 fake_height = document.getElementById("fake").offsetHeight
 svg_fake.attr("width", fake_width).attr("height", fake_height).attr("id", "fake_svg")
 
+// ob svg, set the size
+var ob_svg = d3.select(".ob_image")
+ob_height = document.getElementsByClassName('ob_window')[0].offsetHeight
+ob_width = ob_height
+for (let i = 0; i<6; i++){
+    og_svg = d3.select("#ob" + (i))
+    og_svg.attr("width", ob_width).attr("height", ob_height)
+}
+
+
+
 
 // Function to resize SVGs/////////////////////////////
 // function resizeSVGs() {
@@ -338,7 +349,7 @@ function update_image(window, image, numChannels=1, alpha_list=null){
       .lower() // set it to bottom
       .attr('class', 'pixel')
       .attr('opacity', (d, i) => numChannels !== 1 ? alpha_list ? alpha_list[i] * 0.9 : 0.8 : 1)
-      .attr("pointer-events", "none")
+    //   .attr("pointer-events", "none")
   }
 
 // function update_image(window, image, numChannels = 1, alpha_list = null) {
@@ -366,3 +377,89 @@ function update_image(window, image, numChannels=1, alpha_list=null){
 //         .attr('opacity', (d, i) => numChannels !== 1 ? alpha_list ? alpha_list[i] * 0.9 : 0.8 : 1)
 //         .lower();
 // }
+
+// tooltip
+var ob_svgs = d3.selectAll(".ob_svg")
+ob_svgs.on("mouseover", function(event) {
+
+        // console.log('mouse over')
+        //Get this bar's x/y values, then augment for the tooltip
+        var xPosition = event.pageX;
+        var yPosition = event.pageY;
+
+        
+        //Update the tooltip position and value
+        d3.select("#tooltip")
+            .style("left", xPosition + "px")
+            .style("top", yPosition + "px")						
+            .select("#value")
+            .text('Click here and the click on the map to set the observation point ' + this.id[2]);
+
+        //Show the tooltip
+        d3.select("#tooltip").classed("hidden", false);
+
+        })
+    .on("mouseout", function() {
+        // console.log('mouse out')
+        //Hide the tooltip
+        d3.select("#tooltip").classed("hidden", true);
+
+        })
+    // .on("click", function() {
+    // sortBars();
+    // });
+
+svg_real.on("mouseover", function(event) {
+    
+        // console.log('mouse over')
+        //Get this bar's x/y values, then augment for the tooltip
+        var xPosition = event.pageX;
+        var yPosition = event.pageY;
+    
+        
+        //Update the tooltip position and value
+        d3.select("#tooltip")
+            .style("left", xPosition + "px")
+            .style("top", yPosition + "px")						
+            .select("#value")
+            .text('Click scatters to show the data');
+    
+        //Show the tooltip
+        d3.select("#tooltip").classed("hidden", false);
+    
+        })
+    .on("mouseout", function() {
+        // console.log('mouse out')
+        //Hide the tooltip
+        d3.select("#tooltip").classed("hidden", true);
+    
+        }
+    )
+
+svg_fake.on("mouseover", function(event) {
+        
+            // console.log('mouse over')
+            //Get this bar's x/y values, then augment for the tooltip
+            var xPosition = event.pageX;
+            var yPosition = event.pageY;
+        
+            
+            //Update the tooltip position and value
+            d3.select("#tooltip")
+                .style("left", xPosition + "px")
+                .style("top", yPosition + "px")						
+                .select("#value")
+                .text('Click anywhere and the mao to show the inverse projection');
+        
+            //Show the tooltip
+            d3.select("#tooltip").classed("hidden", false);
+        
+            }
+        )
+        .on("mouseout", function() {
+            // console.log('mouse out')
+            //Hide the tooltip
+            d3.select("#tooltip").classed("hidden", true);
+        
+            }
+        )
