@@ -396,7 +396,8 @@ ob_svgs.on("mouseover", function(event) {
             .style("top", yPosition + "px")						
             .select("#value")
             .text('Click here and then click on the map to set the observation point ' + this.id[2]);
-
+            // .text(function() {console.log(event.target);})
+// 
         //Show the tooltip
         d3.select("#tooltip").classed("hidden", false);
 

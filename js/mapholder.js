@@ -63,8 +63,9 @@ class MapHolder {
             const ind = this.id.slice(2) 
             // console.log(ind)
             d3.select('.selected').classed('selected', false)
+            if (vis.setting_ob == ind) {vis.setting_ob=null; return}
             vis.setting_ob = ind
-            console.log(vis.setting_ob)
+            // console.log(vis.setting_ob)
             // set boader color to read
             d3.select('#'+this.id).classed('selected', true)
             // attr('style', 'border: 2px solid red;')
@@ -209,6 +210,7 @@ class MapHolder {
                     vis.update_main_map()
                     vis.update_ob_windows()
                 }
+        // title labels for scatters
             
     })
     }
