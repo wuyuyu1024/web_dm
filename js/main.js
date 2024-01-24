@@ -383,7 +383,7 @@ function update_image(window, image, numChannels=1, alpha_list=null){
 // tooltip
 var ob_svgs = d3.selectAll(".ob_svg")
 ob_svgs.on("mouseover", function(event) {
-
+        console.log(event)
         // console.log('mouse over')
         //Get this bar's x/y values, then augment for the tooltip
         var xPosition = event.pageX;

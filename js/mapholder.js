@@ -62,10 +62,14 @@ class MapHolder {
         ob_svgs.on("click", function(event, i){
             const ind = this.id.slice(2) 
             // console.log(ind)
+            d3.select('.selected').classed('selected', false)
             vis.setting_ob = ind
             console.log(vis.setting_ob)
-            // vis.ob_setted[ind] = true
-            // console.log(vis.ob_setted)
+            // set boader color to read
+            d3.select('#'+this.id).classed('selected', true)
+            // attr('style', 'border: 2px solid red;')
+         
+            // this.attr('style', 'border: 2px solid red;')
         })
     }
 
@@ -95,7 +99,7 @@ class MapHolder {
                 .attr('y', 0)
                 .attr('width', map_width)
                 .attr('height', map_height)
-                .attr('fill', '#BBBBBB')
+                .attr('fill', '#999999')
                 .attr('opacity', 0.5)
                 // to the bottom
                 .lower()
@@ -336,6 +340,7 @@ class MapHolder {
                         .attr('pointer-events', 'none')
                         .attr('text-anchor', 'middle')
                         .attr('fill', 'white')
+                    d3.select("#ob"+vis.setting_ob).classed('selected', false)
                     vis.setting_ob = null
                 }
         })   
