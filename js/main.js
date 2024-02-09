@@ -351,7 +351,7 @@ function update_image(window, image, numChannels=1, alpha_list=null){
       .lower() // set it to bottom
       .attr('class', 'pixel')
       .attr('opacity', (d, i) => numChannels !== 1 ? alpha_list ? alpha_list[i] * 0.9 : 0.8 : 1)
-    //   .attr("pointer-events", "none")
+      .attr("pointer-events", "none")
   }
 
 // function update_image(window, image, numChannels = 1, alpha_list = null) {

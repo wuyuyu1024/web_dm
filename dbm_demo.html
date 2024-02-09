@@ -1,0 +1,130 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Interactive Inverse Projection and Decsion Map - MNIST example</title>
+
+    <!-- Load Google Font -->
+
+
+    <!-- CSS libraries -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-uWxY/CJNBR+1zjPWmfnSnVxwRheevXITnMqoEIeG1LJrdI0GlVs/9cVSyPYXdcSF" crossorigin="anonymous">
+    <!-- <link rel="stylesheet" href="css/fontawesome.min.css"> -->
+
+    <!-- Custom CSS code -->
+    <link rel="stylesheet" href="css/dbm_demo.css">
+</head>
+<body>
+
+
+
+<div class="global_container offset-1">
+    <header>
+        <div class="align-self-center">
+        <h1>Interactive Inverse Projection and Decision Map</h1> 
+        <h2>MNIST example</h2>
+        </div>  
+    </header>
+
+    
+    <div class="main_left"> 
+        <div id="main_map"> </div>
+    </div>
+
+    <div class="main_widget" id="widget">                        
+
+        <!-- <div id="data_window"> -->
+        
+        
+                <div class="row-md-1 offset-1"><h2>Inverse Projection</h2>
+                    <div id="fake" class="image"></div>
+                </div>
+        <!-- </div> -->
+        <br>
+        <!-- <div>
+            <div><h4>Observation Windows</h4></div>
+            <div id="ob_window_contrainer"> -->
+                <div class="ob_window"><svg class="ob_svg" id="ob0"></svg></div>  
+                <div class="ob_window"><svg class="ob_svg" id="ob1"></svg></div>
+                <div class="ob_window"><svg class="ob_svg" id="ob2"></svg></div>
+                <div class="ob_window"><svg class="ob_svg" id="ob3"></svg></div>
+                <div class="ob_window"><svg class="ob_svg" id="ob4"></svg></div>
+                <div class="ob_window"><svg class="ob_svg" id="ob5"></svg></div>
+                          
+
+            <!-- </div>
+        </div> -->
+    </div>
+    
+
+    <footer>
+        <div>
+        <p>Demonstration of [Placeholder]</p>
+        </div>
+        <div>
+        <a href="https://vig.science.uu.nl/">Visualization and Graphics Group</a>
+        </div>
+                    <div>
+                <input type="checkbox" id="checkbox_adjust" name="checkbox0" value='dontknow'>
+                <label for="checkbox_adjust">click data to adjust inverse projection</label>
+            </div>
+     
+            <!-- sliders -->
+            <div>
+                <label for="slider_radius">Radius:</label>
+                <input id="slider_radius" type="range" min="0.01" max="0.34" step="0.01" value="0.1" orient="horizontal" class="slider" > 
+            </div>
+
+            <div>
+                <label for="slider_factor">Factor:</label>
+                <input id="slider_factor" type="range" min="0" max="1" step="0.01" value="0.3" orient="horizontal" class="slider">
+            </div>
+            <div class="row-md-4 offset-1"><h5>Real</h5>
+                <div id="real" class="image"></div>
+            </div>
+            <div>
+                <label for="map_showing_dropdown">Map content:</label>
+                <select id="map_showing_dropdown">
+                    <option value="4">None</option>
+                    <option value="2">Distance to the initial z</option>
+                    <option value="3">Distance to the initial surface</option>
+                    <option value="0">Decision Map</option>
+                    <option value="1">Decision Map with confidence</option>
+                </select> 
+            </div>
+    </footer>
+
+
+</div>
+
+<!-- tooltip -->
+<div id="tooltip" class="hidden">
+			<!-- <p><strong>Important Label Heading</strong></p> -->
+			<p><span id="value"><strong>Placeholder</strong></span></p>
+</div>
+
+<!-- Load JS libraries -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-kQtW33rZJAHjgefvhyyzcGF3C5TFyBQBA13V1RKPf4uH+bwyzQxZ6CmMZHmNBEfJ"
+        crossorigin="anonymous"></script>
+
+<!-- d3 -->
+<script src="https://d3js.org/d3.v7.min.js"></script>
+
+<!-- Import TensorFlow.js -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script> -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgpu/dist/tf-backend-webgpu.js"></script>
+<!-- Import tfjs-vis -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis@1.0.2/dist/tfjs-vis.umd.min.js"></script> -->
+
+<!-- my js files -->
+<script src="js/KNNRegressor.js"></script>
+<script src="js/mapholder.js"></script>
+<!-- Load data, create visualizations -->
+<script src="js/main.js"></script>
+</body>
+</html>
