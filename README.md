@@ -1,4 +1,4 @@
-# web_dm
+# browser-decision-map
 
 Browser-based demo for exploring an interactive inverse projection and decision map on MNIST data. The app loads TensorFlow.js models and a precomputed dataset directly in the browser, then uses D3 to render the map, sample previews, and observation windows.
 
